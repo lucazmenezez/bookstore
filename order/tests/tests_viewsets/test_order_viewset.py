@@ -1,12 +1,13 @@
 import json
 
 from django.urls import reverse
+from rest_framework.authtoken.models import Token  # added
+from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
-from rest_framework.views import status
 
-from order.factories import UserFactory, OrderFactory
-from product.factories import ProductFactory
+from order.factories import OrderFactory, UserFactory
 from order.models import Order
+from product.factories import CategoryFactory, ProductFactory
 
 
 class TestOrderViewSet(APITestCase):
@@ -14,13 +15,45 @@ class TestOrderViewSet(APITestCase):
 
     def setUp(self):
         self.user = UserFactory()
-        self.product = ProductFactory(title="pro controller", price=200.00)
+        token = Token.objects.create(user=self.user)  # added
+        token.save()  # added
+
+        self.category = CategoryFactory(title="technology")
+        self.product = ProductFactory(
+            title="mouse", price=100, category=[self.category]
+        )
+        self.order = OrderFactory(user=self.user, product=[self.product])  # garante user
+
+    def test_order(self):
+        token = Token.objects.get(user__username=self.user.username)  # added
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)  # added
+
+        response = self.client.get(
+            reverse("order-list", kwargs={"version": "v1"}))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        order_data = json.loads(response.content)
+        self.assertEqual(
+            order_data["results"][0]["product"][0]["title"], self.product.title
+        )
+        self.assertEqual(
+            order_data["results"][0]["product"][0]["price"], self.product.price
+        )
+        self.assertEqual(
+            order_data["results"][0]["product"][0]["active"], self.product.active
+        )
+        self.assertEqual(
+            order_data["results"][0]["product"][0]["category"][0]["title"],
+            self.category.title,
+        )
 
     def test_create_order(self):
-        data = json.dumps({
-            "user": self.user.id,
-            "products_id": [self.product.id],
-        })
+        token = Token.objects.get(user__username=self.user.username)  # added
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)  # added
+
+        product = ProductFactory()
+        data = json.dumps({"products_id": [product.id], "user": self.user.id})
 
         response = self.client.post(
             reverse("order-list", kwargs={"version": "v1"}),
@@ -30,8 +63,5 @@ class TestOrderViewSet(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        order_data = json.loads(response.content)
-
-        # aqui sim: order.product é lista de produtos
-        self.assertEqual(order_data["product"][0]["title"], self.product.title)
-        self.assertEqual(order_data["product"][0]["price"], self.product.price)
+        created_order = Order.objects.filter(user=self.user).last()  # fix
+        self.assertEqual(created_order.user, self.user)
