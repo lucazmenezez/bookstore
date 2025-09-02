@@ -27,6 +27,7 @@ RUN apt-get update \
 
 # instala poetry
 RUN pip install "poetry==$POETRY_VERSION"
+RUN pip install psycopg2
 
 # instala dependências python
 WORKDIR $PYSETUP_PATH
