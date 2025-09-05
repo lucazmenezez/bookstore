@@ -1,37 +1,38 @@
-name: Python application
+name: Django CI with Poetry
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-         python-version: [3.11, 3.12]
+        python-version: [3.11, 3.12]
 
-    runs-on: ubuntu-latest
+    env:
+      DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1"
+      SECRET_KEY: "ci-secret-key"
+      DEBUG: '0'
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install poetry
-      run: |
-        python -m ensurepip
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade poetry
+      - name: Install Poetry
+        run: |
+          pip install --upgrade pip
+          pip install poetry
 
-    - name: View poetry --help
-      run: poetry --help
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi
 
-    - name: Install dependencies
-      shell: bash
-      run: python -m poetry install
+      - name: Run migrations
+        run: poetry run python manage.py migrate
 
-    - name: Test
-      run: |
-        poetry run python manage.py test
+      - name: Run tests
+        run: poetry run python manage.py test
