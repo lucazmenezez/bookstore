@@ -1,6 +1,6 @@
 name: Django CI with Poetry
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
