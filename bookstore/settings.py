@@ -146,4 +146,7 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = int(os.environ.get("DEBUG", default=1))  # 1 para local, 0 no CI
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split()
+ALLOWED_HOSTS = os.environ.get(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost 127.0.0.1 lucasDLmenezes.pythonanywhere.com"
+).split()
