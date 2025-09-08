@@ -18,7 +18,7 @@ Including another URLconf
 import debug_toolbar
 from django.contrib import admin
 from django.urls import path, re_path, include
-import bookstore.views as views
+from bookstore import views
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
