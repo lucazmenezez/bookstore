@@ -18,6 +18,7 @@ Including another URLconf
 import debug_toolbar
 from django.contrib import admin
 from django.urls import path, re_path, include
+import bookstore.views as views
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
@@ -26,4 +27,5 @@ urlpatterns = [
     re_path("bookstore/(?P<version>(v1|v2))/", include("order.urls")),
     re_path("bookstore/(?P<version>(v1|v2))/", include("product.urls")),
     path("api-token-auth/", obtain_auth_token, name="api_token_auth"),
+    path("update_server/", views.update, name="update"),
 ]
