@@ -150,3 +150,18 @@ ALLOWED_HOSTS = os.environ.get(
     "DJANGO_ALLOWED_HOSTS",
     "localhost 127.0.0.1 lucasDLmenezes.pythonanywhere.com"
 ).split()
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
+
+STATIC_URL = '/static/'
+
+# Pasta onde o Django vai juntar todos os arquivos estáticos
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Se você tiver arquivos estáticos próprios fora dos apps, pode usar:
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+# Media files (uploads de usuários, se for usar)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
